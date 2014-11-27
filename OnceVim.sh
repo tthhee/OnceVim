@@ -27,16 +27,6 @@ debug() {
     fi
 }
 
-program_exists() {
-    local ret='0'
-    type $1 >/dev/null 2>&1 || { local ret='1'; }
-
-    # throw error on non-zero return value
-    if [ ! "$ret" -eq '0' ]; then
-    error "$2"
-    fi
-}
-
 variable_set() {
     if [ -z "$1" ]; then
         error "You must have your HOME environmental variable set to continue."
@@ -83,10 +73,8 @@ upgrade_repo() {
 }
 
 clone_repo() {
-    program_exists "git" "Sorry, we cannot continue without GIT, please install it first."
-
     if [ ! -e "$app_dir" ]; then
-        git clone --recursive "$git_uri" "$app_dir"
+        git clone "$git_uri" "$app_dir"
         ret="$?"
         success "$1"
         debug
@@ -114,7 +102,7 @@ create_symlinks() {
     fi
 
     lnif "$endpath/.vimrc"              "$HOME/.vimrc"
-    lni "$endpath/.vimrc.bundles"      "$HOME/.vimrc.bundles"
+    lnif "$endpath/.vimrc.bundles"      "$HOME/.vimrc.bundles"
     lnif "$endpath/.vim"                "$HOME/.vim"
 
     ret="$?"
@@ -141,12 +129,8 @@ setup_vundle() {
 
 ############################ MAIN()
 variable_set "$HOME"
-program_exists "vim" "To install $app_name you first need to install Vim."
-
-do_backup   "Your old vim stuff has a suffix now and looks like .vim.`date +%Y%m%d%S`" \
         "$HOME/.vim" \
         "$HOME/.vimrc" \
-        "$HOME/.gvimrc"
 
 clone_repo      "Successfully cloned $app_name"
 
