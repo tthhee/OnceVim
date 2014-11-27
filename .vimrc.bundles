@@ -43,7 +43,8 @@
 
     " General {
             Bundle 'scrooloose/nerdtree'
-            Bundle 'altercation/vim-colors-solarized'
+            Bundle 'tomasr/molokai'
+            "let g:molokai_original = 1
             Bundle 'spf13/vim-colors'
             Bundle 'tpope/vim-surround'
             Bundle 'tpope/vim-repeat'
@@ -81,7 +82,6 @@
     " General Programming {
             " Pick one of the checksyntax, jslint, or syntastic
             Bundle 'scrooloose/syntastic'
-            Bundle 'tpope/vim-fugitive'
             Bundle 'mattn/webapi-vim'
             Bundle 'mattn/gist-vim'
             Bundle 'scrooloose/nerdcommenter'
