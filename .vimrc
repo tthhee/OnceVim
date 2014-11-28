@@ -32,6 +32,10 @@
     set shortmess+=filmnrxoOtT          " 过滤'hit enter to continue'
     set viewoptions=folds,options,cursor,unix,slash " Unix / Windows 兼容性设置
     au FileType gitcommit au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0]) "git commit 默认在第一行进行
+    " 恢复关闭时的位置
+    if has("autocmd")
+      au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+    endif
 " }
 
 " UI设置 {
@@ -92,13 +96,12 @@
 
 " Key Bindings {
     let mapleader = ','
-    " Wrapped lines goes down/up to next row, rather than next line in file.
-    noremap j gj
-    noremap k gk
-
     " 从光标位置复制到行末
     nnoremap Y y$
-
+    " <leader>+/ 去除搜索高亮
+    noremap <silent><leader>/ :nohls<CR>
+    " ;快速进入命令行
+    nnoremap ; :
 " }
 
 " Plugins {
@@ -178,8 +181,47 @@
         endif
     " }
 
+    " NeoComplete {
+        hi Pmenu  guifg=#000000 guibg=#F8F8F8 ctermfg=black ctermbg=darkcyan
+        hi PmenuSbar  guifg=#8A95A7 guibg=#F8F8F8 gui=NONE ctermfg=darkcyan ctermbg=darkcyan cterm=NONE
+        hi PmenuThumb  guifg=#F8F8F8 guibg=#8A95A7 gui=NONE ctermfg=green ctermbg=darkcyan cterm=NONE
+        let g:acp_enableAtStartup = 0
+        let g:neocomplete#enable_at_startup = 1
+        let g:neocomplete#enable_smart_case = 1
+        let g:neocomplete#sources#syntax#min_keyword_length = 3
+        let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+        let g:neocomplete#sources#dictionary#dictionaries = {
+            \ 'default' : '',
+            \ 'vimshell' : $HOME.'/.vimshell_hist',
+            \ 'scheme' : $HOME.'/.gosh_completions'
+                \ }
+        " Define keyword.
+        if !exists('g:neocomplete#keyword_patterns')
+            let g:neocomplete#keyword_patterns = {}
+        endif
+        let g:neocomplete#keyword_patterns['default'] = '\h\w*'
+        " Plugin key-mappings.
+        inoremap <expr><C-g>     neocomplete#undo_completion()
+        inoremap <expr><C-l>     neocomplete#complete_common_string()
+        " Recommended key-mappings.
+        " <TAB>: completion.
+        inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+        " Close popup by <Space>.
+        inoremap <expr><Space> pumvisible() ? neocomplete#close_popup() : "\<Space>"
+        " AutoComplPop like behavior.
+        let g:neocomplete#enable_auto_select = 1
+        " Enable omni completion.
+        autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+        autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+        autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+        autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+        autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+        " Enable heavy omni completion.
+        if !exists('g:neocomplete#sources#omni#input_patterns')
+          let g:neocomplete#sources#omni#input_patterns = {}
+        endif
+    " }
 " }
-
 " GUI Settings {
     if has('gui_running')
         set guioptions-=T           " Remove the toolbar
