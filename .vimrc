@@ -18,67 +18,62 @@
     " }
 " }
 
-" Use bundles config {
+" 加载Vundles{
     if filereadable(expand("~/.vimrc.bundles"))
         source ~/.vimrc.bundles
     endif
 " }
 
-" General {
-
-    set background=dark         " Assume a dark background
-    filetype plugin indent on   " Automatically detect file types.
-    syntax on                   " Syntax highlighting
+" 通用设置 {
+    set background=dark
+    filetype plugin indent on   " 自动检测文件类型
+    syntax on                   " 开启语法高亮
     scriptencoding utf-8
-
-    set shortmess+=filmnrxoOtT          " Abbrev. of messages (avoids 'hit enter')
-    set viewoptions=folds,options,cursor,unix,slash " Better Unix / Windows compatibility
-    set virtualedit=onemore             " Allow for cursor beyond last character
-    set history=1000                    " Store a ton of history (default is 20)
-    set spell                           " Spell checking on
-
-    au FileType gitcommit au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
+    set shortmess+=filmnrxoOtT          " 过滤'hit enter to continue'
+    set viewoptions=folds,options,cursor,unix,slash " Unix / Windows 兼容性设置
+    au FileType gitcommit au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0]) "git commit 默认在第一行进行
 " }
 
-" Vim UI {
-
+" UI设置 {
     colorscheme molokai
-    set showmode                    " Display the current mode
-    set cursorline                  " Highlight current line
-    highlight clear SignColumn      " SignColumn should match background
-    highlight clear LineNr          " Current line number row will have same background color in relative mode
+    set showmode                    " 显示当前
+    set cursorline                  " 高亮当前行
+    highlight clear SignColumn      " 光标背景
+    highlight clear LineNr          " 行标背景
 
     if has('cmdline_info')
-        set ruler                   " Show the ruler
-        set rulerformat=%30(%=\:b%n%y%m%r%w\ %l,%c%V\ %P%) " A ruler on steroids
-        set showcmd                 " Show partial commands in status line and
+        set ruler                   " 显示ruler
+        set rulerformat=%30(%=\:b%n%y%m%r%w\ %l,%c%V\ %P%) " ruler格式
+        set showcmd                 " 显示正在输入的指令
     endif
 
     if has('statusline')
         set laststatus=2
-        " Broken down into easily includeable segments
-        set statusline=%<%f\                     " Filename
-        set statusline+=%w%h%m%r                 " Options
-        set statusline+=%{fugitive#statusline()} " Git Hotness
-        set statusline+=\ [%{&ff}/%Y]            " Filetype
-        set statusline+=\ [%{getcwd()}]          " Current dir
-        set statusline+=%=%-14.(%l,%c%V%)\ %p%%  " Right aligned file nav info
+        set statusline=%<%f\                     " 文件名
+        set statusline+=%w%h%m%r                 " 选项
+        set statusline+=\ [%{&ff}/%Y]            " 文件类型
+        set statusline+=\ [%{getcwd()}]          " 当前目录
+        set statusline+=%=%-14.(%l,%c%V%)\ %p%%  " 导航信息
     endif
 
-    set backspace=indent,eol,start  " Backspace for dummies
-    set linespace=0                 " No extra spaces between rows
-    set nu                          " Line numbers on
-    set showmatch                   " Show matching brackets/parenthesis
-    set incsearch                   " Find as you type search
-    set hlsearch                    " Highlight search terms
-    set ignorecase                  " Case insensitive search
-    set smartcase                   " Case sensitive when uc present
-    set whichwrap=b,s,h,l,<,>,[,]   " Backspace and cursor keys wrap too
-    set list
-    set listchars=tab:›\ ,trail:•,extends:#,nbsp:. " Highlight problematic whitespace
+    set backspace=indent,eol,start  " Backspace键调整
+    set whichwrap=b,s,h,l,<,>,[,]   " 光标在行首行末时自动换行
+    set linespace=0                 " 行间距
+    set nu                          " 开启行号
+    "{搜索匹配
+    set showmatch                   " 匹配高亮
+    set incsearch                   " 实时搜索
+    set hlsearch                    " 高亮匹配项
+    set ignorecase                  " 忽略大小写
+    set smartcase                   " 搜索输入含大写时切换为大小写敏感
+    "}
+    "{ 显示多余空白字符
+    set list                        
+    set listchars=tab:›\ ,trail:•,extends:#,nbsp:.
+    "}
 " }
 
-" Formatting {
+" 格式 {
     set nowrap                      " Do not wrap long lines
     set autoindent                  " Indent at the same level of the previous line
     set shiftwidth=4                " Use indents of 4 spaces
@@ -89,44 +84,20 @@
     set splitright                  " Puts new vsplit windows to the right of the current
     set splitbelow                  " Puts new split windows to the bottom of the current
     set pastetoggle=<F12>           " pastetoggle (sane indentation on pastes)
-    autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl autocmd BufWritePre <buffer> if !exists('g:spf13_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
+    autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl autocmd BufWritePre <buffer>
     autocmd BufNewFile,BufRead *.html.twig set filetype=html.twig
     autocmd FileType haskell,puppet,ruby,yml setlocal expandtab shiftwidth=2 softtabstop=2
     autocmd BufNewFile,BufRead *.coffee set filetype=coffee
 " }
 
-" Key (re)Mappings {
-
+" Key Bindings {
     let mapleader = ','
-
     " Wrapped lines goes down/up to next row, rather than next line in file.
     noremap j gj
     noremap k gk
 
-    " Stupid shift key fixes
-    if !exists('g:spf13_no_keyfixes')
-        if has("user_commands")
-            command! -bang -nargs=* -complete=file E e<bang> <args>
-            command! -bang -nargs=* -complete=file W w<bang> <args>
-            command! -bang -nargs=* -complete=file Wq wq<bang> <args>
-            command! -bang -nargs=* -complete=file WQ wq<bang> <args>
-            command! -bang Wa wa<bang>
-            command! -bang WA wa<bang>
-            command! -bang Q q<bang>
-            command! -bang QA qa<bang>
-            command! -bang Qa qa<bang>
-        endif
-
-        cmap Tabe tabe
-    endif
-
-    " Yank from the cursor to the end of the line, to be consistent with C and D.
+    " 从光标位置复制到行末
     nnoremap Y y$
-
-    nmap <silent> <leader>/ :nohlsearch<CR>
-
-    " Find merge conflict markers
-    map <leader>fc /\v^[<\|=>]{7}( .*\|$)<CR>
 
 " }
 
@@ -206,13 +177,7 @@
         endif
     " }
 
-    " JSON {
-        nmap <leader>jt <Esc>:%!python -m json.tool<CR><Esc>:set filetype=json<CR>
-        let g:vim_json_syntax_conceal = 0
-    " }
-
     " PyMode {
-        " Disable if python support not present
         if !has('python')
             let g:pymode = 0
         endif
