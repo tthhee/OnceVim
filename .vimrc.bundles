@@ -23,6 +23,8 @@
             Bundle 'Lokaltog/vim-easymotion'
             Bundle 'nathanaelkane/vim-indent-guides'
             Bundle 'mhinz/vim-signify'
+            Bundle 'bronson/vim-trailing-whitespace'
+            Bundle 'kien/rainbow_parentheses.vim'
     " }
 
     " Writing {

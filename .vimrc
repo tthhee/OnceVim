@@ -36,6 +36,11 @@
     if has("autocmd")
       au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
     endif
+    " Rainbow!
+    au VimEnter * RainbowParenthesesToggle
+    au Syntax * RainbowParenthesesLoadRound
+    au Syntax * RainbowParenthesesLoadSquare
+    au Syntax * RainbowParenthesesLoadBraces
 " }
 
 " UI设置 {
@@ -85,10 +90,30 @@
     set tabstop=4                   " An indentation every four columns
     set softtabstop=4               " Let backspace delete indent
     set nojoinspaces                " Prevents inserting two spaces after punctuation on a join (J)
-    set splitright                  " Puts new vsplit windows to the right of the current
-    set splitbelow                  " Puts new split windows to the bottom of the current
-    set pastetoggle=<F12>           " pastetoggle (sane indentation on pastes)
-    autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl autocmd BufWritePre <buffer>
+    " 定义函数AutoSetFileHead，自动插入文件头
+    autocmd BufNewFile *.sh,*.py exec ":call AutoSetFileHead()"
+    function! AutoSetFileHead()
+        "如果文件类型为.sh文件
+        if &filetype == 'sh'
+            call setline(1, "\#!/bin/bash")
+        endif
+        "如果文件类型为python
+        if &filetype == 'python'
+            call setline(1, "\#!/usr/bin/env python")
+            call append(1, "\# encoding: utf-8")
+        endif
+        normal G
+        normal o
+        normal o
+    endfunc
+    " 关闭时自动清除多余空格
+    fun! <SID>StripTrailingWhitespaces()
+        let l = line(".")
+        let c = col(".")
+        %s/\s\+$//e
+        call cursor(l, c)
+    endfun
+    autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl autocmd BufWritePre <buffer> : call <SID>StripTrailingWhitespaces()
     autocmd BufNewFile,BufRead *.html.twig set filetype=html.twig
     autocmd FileType haskell,puppet,ruby,yml setlocal expandtab shiftwidth=2 softtabstop=2
     autocmd BufNewFile,BufRead *.coffee set filetype=coffee
@@ -114,17 +139,12 @@
     " NerdTree {
         if isdirectory(expand("~/.vim/bundle/nerdtree"))
             map <C-e> <plug>NERDTreeTabsToggle<CR>
-            map <leader>e :NERDTreeFind<CR>
-            nmap <leader>nt :NERDTreeFind<CR>
-
-            let NERDTreeShowBookmarks=1
+            map <leader>n :NERDTreeFind<CR>
             let NERDTreeIgnore=['\.py[cd]$', '\~$', '\.swo$', '\.swp$', '^\.git$', '^\.hg$', '^\.svn$', '\.bzr$']
             let NERDTreeChDirMode=0
             let NERDTreeQuitOnOpen=1
-            let NERDTreeMouseMode=2
             let NERDTreeShowHidden=1
             let NERDTreeKeepTreeInNewTab=1
-            let g:nerdtree_tabs_open_on_gui_startup=0
         endif
     " }
 
@@ -206,8 +226,6 @@
         " Recommended key-mappings.
         " <TAB>: completion.
         inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-        " Close popup by <Space>.
-        inoremap <expr><Space> pumvisible() ? neocomplete#close_popup() : "\<Space>"
         " AutoComplPop like behavior.
         let g:neocomplete#enable_auto_select = 1
         " Enable omni completion.
